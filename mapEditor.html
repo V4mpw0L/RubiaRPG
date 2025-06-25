@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>RubiaRPG - Editor de Mapa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background: #1c140d;
+      color: #fff;
+      font-family: 'Verdana', sans-serif;
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'UnifrakturCook', cursive;
+      font-size: 32px;
+      color: #f4e6c5;
+      background: #3a2a18;
+      margin: 0;
+      padding: 10px;
+      border-bottom: 3px solid #8b5a2b;
+    }
+
+    canvas {
+      border: 2px solid #8b5a2b;
+      background: #222;
+      image-rendering: pixelated;
+      margin-top: 10px;
+    }
+
+    #tilebar {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 8px;
+    }
+
+    .tileBtn {
+      width: 32px;
+      height: 32px;
+      background-size: cover;
+      border: 1px solid #555;
+      margin: 2px;
+    }
+
+    #actions {
+      margin-top: 10px;
+    }
+
+    label, button {
+      margin: 5px;
+      padding: 6px 12px;
+      font-size: 14px;
+      background: #5b4025;
+      color: #fff;
+      border: 1px solid #8b5a2b;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <h1>RubiaRPG - Editor de Mapa</h1>
+
+  <div id="tilebar"></div>
+  <canvas id="mapCanvas" width="640" height="480"></canvas>
+
+  <div id="actions">
+    <label>
+      📂 Carregar mapa
+      <input type="file" id="loadFile" accept=".json">
+    </label>
+    <button id="save">💾 Salvar mapa (copiar JSON)</button>
+  </div>
+
+  <script>
+    const tileSize = 32;
+    const cols = 20, rows = 15;
+    const canvas = document.getElementById("mapCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const tileset = new Image();
+    tileset.src = "assets/tileset.png";
+    const tileCount = 7;
+    let currentTile = 0;
+    let map = Array.from({ length: rows }, () => Array(cols).fill(0));
+    let spawn = { x: 0, y: 0 };
+
+    function drawMap() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          ctx.drawImage(tileset, map[y][x] * 32, 0, 32, 32, x * 32, y * 32, 32, 32);
+        }
+      }
+      ctx.fillStyle = "red";
+      ctx.fillRect(spawn.x * tileSize + 8, spawn.y * tileSize + 8, 16, 16);
+    }
+
+    canvas.addEventListener("click", e => {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / tileSize);
+      const y = Math.floor((e.clientY - rect.top) / tileSize);
+      if (x >= 0 && x < cols && y >= 0 && y < rows) {
+        map[y][x] = currentTile;
+        drawMap();
+      }
+    });
+
+    canvas.addEventListener("contextmenu", e => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / tileSize);
+      const y = Math.floor((e.clientY - rect.top) / tileSize);
+      spawn = { x, y };
+      drawMap();
+    });
+
+    document.getElementById("save").onclick = () => {
+      const json = JSON.stringify({ map, spawn }, null, 2);
+      navigator.clipboard.writeText(json);
+      alert("Mapa + spawn copiados!");
+    };
+
+    document.getElementById("loadFile").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try {
+          const data = JSON.parse(evt.target.result);
+          if (data.map) {
+            map = data.map;
+            spawn = data.spawn || { x: 0, y: 0 };
+            drawMap();
+          }
+        } catch {
+          alert("Erro ao ler o JSON.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Carrega map.json automaticamente
+    fetch("map.json")
+      .then(res => res.json())
+      .then(data => {
+        if (data.map) {
+          map = data.map;
+          spawn = data.spawn || { x: 0, y: 0 };
+          drawMap();
+        }
+      })
+      .catch(() => drawMap());
+
+    const bar = document.getElementById("tilebar");
+    for (let i = 0; i < tileCount; i++) {
+      const btn = document.createElement("button");
+      btn.className = "tileBtn";
+      btn.style.backgroundImage = "url('assets/tileset.png')";
+      btn.style.backgroundPosition = `-${i * 32}px 0px`;
+      btn.onclick = () => currentTile = i;
+      bar.appendChild(btn);
+    }
+
+    tileset.onload = drawMap;
+  </script>
+</body>
+</html>

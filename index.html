@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>RubiaRPG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header id="banner">
+    <h1>RubiaRPG</h1>
+    <div class="top-buttons">
+      <button id="btn-save" onclick="salvar()">💾 Salvar</button>
+      <button id="btn-reset" onclick="resetar()">🗑️ Resetar</button>
+    </div>
+  </header>
+
+  <canvas id="game" width="640" height="480"></canvas>
+
+  <div id="hud">
+    <div id="stats">
+      <div class="stat">
+        ❤️ HP: <span id="hp">100</span>
+        <div class="stat-bar"><div id="hp-bar" class="stat-bar-inner bar-hp"></div></div>
+      </div>
+      <div class="stat">
+        🔷 Mana: <span id="mana">100</span>
+        <div class="stat-bar"><div id="mana-bar" class="stat-bar-inner bar-mana"></div></div>
+      </div>
+      <div class="stat">
+        ⭐ XP: <span id="xp">0 / 100</span>
+        <div class="stat-bar"><div id="xp-bar" class="stat-bar-inner bar-xp"></div></div>
+      </div>
+      <div class="stat">🏅 Nível: <span id="level">1</span></div>
+      <div class="stat">🪙 Gold: <span id="gold">0</span></div>
+    </div>
+    <div id="minimap">
+      <div class="title">🧭 Mapa</div>
+      <canvas id="mini" width="80" height="60"></canvas>
+    </div>
+  </div>
+
+  <div id="controls">
+    <button onclick="mover(0,-1)">⬆️</button>
+    <div class="row">
+      <button onclick="mover(-1,0)">⬅️</button>
+      <button onclick="mover(1,0)">➡️</button>
+    </div>
+    <button onclick="mover(0,1)">⬇️</button>
+  </div>
+
+  <div id="inventory">
+    <div class="inv-title">🎒 Inventário (<span id="inv-page">1</span>)</div>
+    <div id="inv-grid"></div>
+    <div class="inv-nav">
+      <button onclick="mudarPagina(-1)">◀️</button>
+      <button onclick="mudarPagina(1)">▶️</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
